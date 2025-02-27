@@ -1,39 +1,104 @@
-using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
+using RPTA.ProductApi.Data;
+using RPTA.ProductApi.Models;
 
-var builder = WebApplication.CreateSlimBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
-builder.AddServiceDefaults();
-
-builder.Services.ConfigureHttpJsonOptions(options =>
+// Add services to the container
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
 {
-    options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
+    c.SwaggerDoc("v1", new() { Title = "RPTA.ProductApi", Version = "v1" });
 });
+
+// Configure PostgreSQL with Aspire
+var connectionString = builder.Configuration.GetConnectionString("ProductDb") ??
+    "Host=localhost;Database=productdb;Username=postgres;Password=postgres";
+
+builder.Services.AddDbContext<ProductDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
+// If using Aspire, register PostgreSQL
+builder.Services.AddNpgsqlDataSource(connectionString);
+
+// Add health checks for Aspire dashboard
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ProductDbContext>();
+
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-app.MapDefaultEndpoints();
+// Configure the HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
 
-var sampleTodos = new Todo[] {
-    new(1, "Walk the dog"),
-    new(2, "Do the dishes", DateOnly.FromDateTime(DateTime.Now)),
-    new(3, "Do the laundry", DateOnly.FromDateTime(DateTime.Now.AddDays(1))),
-    new(4, "Clean the bathroom"),
-    new(5, "Clean the car", DateOnly.FromDateTime(DateTime.Now.AddDays(2)))
-};
+    // Create database if not exists
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
+    await dbContext.Database.EnsureCreatedAsync();
+}
 
-var todosApi = app.MapGroup("/todos");
-todosApi.MapGet("/", () => sampleTodos);
-todosApi.MapGet("/{id}", (int id) =>
-    sampleTodos.FirstOrDefault(a => a.Id == id) is { } todo
-        ? Results.Ok(todo)
-        : Results.NotFound());
+app.UseHttpsRedirection();
+
+// Define API endpoints
+// GET all products
+app.MapGet("/products", async (ProductDbContext db) =>
+    await db.Products.ToListAsync())
+.WithName("GetAllProducts")
+.Produces<List<Product>>(StatusCodes.Status200OK);
+
+// GET product by id
+app.MapGet("/products/{id}", async (int id, ProductDbContext db) =>
+    await db.Products.FindAsync(id) is Product product
+        ? Results.Ok(product)
+        : Results.NotFound())
+.WithName("GetProductById")
+.Produces<Product>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status404NotFound);
+
+// POST new product
+app.MapPost("/products", async (Product product, ProductDbContext db) =>
+{
+    db.Products.Add(product);
+    await db.SaveChangesAsync();
+    return Results.Created($"/products/{product.Id}", product);
+})
+.WithName("CreateProduct")
+.Produces<Product>(StatusCodes.Status201Created);
+
+// PUT update product
+app.MapPut("/products/{id}", async (int id, Product updatedProduct, ProductDbContext db) =>
+{
+    var product = await db.Products.FindAsync(id);
+    if (product == null) return Results.NotFound();
+
+    product.Name = updatedProduct.Name;
+    product.Description = updatedProduct.Description;
+    product.Price = updatedProduct.Price;
+    product.Stock = updatedProduct.Stock;
+
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+})
+.WithName("UpdateProduct")
+.Produces(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status404NotFound);
+
+// DELETE product
+app.MapDelete("/products/{id}", async (int id, ProductDbContext db) =>
+{
+    var product = await db.Products.FindAsync(id);
+    if (product == null) return Results.NotFound();
+
+    db.Products.Remove(product);
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+})
+.WithName("DeleteProduct")
+.Produces(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status404NotFound);
 
 app.Run();
-
-public record Todo(int Id, string? Title, DateOnly? DueBy = null, bool IsComplete = false);
-
-[JsonSerializable(typeof(Todo[]))]
-internal partial class AppJsonSerializerContext : JsonSerializerContext
-{
-
-}
