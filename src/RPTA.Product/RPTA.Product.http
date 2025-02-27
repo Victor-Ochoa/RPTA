@@ -1,0 +1,11 @@
+@RPTA.Product_HostAddress = http://localhost:5038
+
+GET {{RPTA.Product_HostAddress}}/todos/
+Accept: application/json
+
+###
+
+GET {{RPTA.Product_HostAddress}}/todos/1
+Accept: application/json
+
+###
