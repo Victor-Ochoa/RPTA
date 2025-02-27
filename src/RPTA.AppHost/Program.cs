@@ -1,10 +1,9 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var postgres = builder.AddPostgres("postgresdb")
-    .WithPgWeb()
+var sqlServer = builder.AddSqlServer("sqlserver-db")
     .WithLifetime(ContainerLifetime.Persistent); ;
 
-var productDb = postgres
+var productDb = sqlServer
     .AddDatabase("productdb");
 
 var userApi = builder.AddProject<Projects.RPTA_UserApi>("rpta-userapi");

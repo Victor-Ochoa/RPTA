@@ -11,15 +11,7 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new() { Title = "RPTA.ProductApi", Version = "v1" });
 });
 
-// Configure PostgreSQL with Aspire
-var connectionString = builder.Configuration.GetConnectionString("ProductDb") ??
-    "Host=localhost;Database=productdb;Username=postgres;Password=postgres";
-
-builder.Services.AddDbContext<ProductDbContext>(options =>
-    options.UseNpgsql(connectionString));
-
-// If using Aspire, register PostgreSQL
-builder.Services.AddNpgsqlDataSource(connectionString);
+builder.AddSqlServerDbContext<ProductDbContext>(connectionName: "productdb");
 
 // Add health checks for Aspire dashboard
 builder.Services.AddHealthChecks()
