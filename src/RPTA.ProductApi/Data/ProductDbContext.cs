@@ -9,26 +9,9 @@ public class ProductDbContext(DbContextOptions<ProductDbContext> options) : DbCo
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Seed some initial data
-        modelBuilder.Entity<Product>().HasData(
-            new Product
-            {
-                Id = 1,
-                Name = "Basic Product",
-                Description = "A simple product for demonstration",
-                Price = 19.99m,
-                Stock = 100,
-                CreatedAt = DateTime.UtcNow
-            },
-            new Product
-            {
-                Id = 2,
-                Name = "Premium Product",
-                Description = "A premium product with advanced features",
-                Price = 49.99m,
-                Stock = 50,
-                CreatedAt = DateTime.UtcNow
-            }
-        );
+        modelBuilder.Entity<Product>().HasKey(x => x.Id).IsClustered();
+        modelBuilder.Entity<Product>().Property(p => p.Name).HasMaxLength(30).IsRequired();
+        modelBuilder.Entity<Product>().Property(p => p.Description).HasMaxLength(500);
+        modelBuilder.Entity<Product>().Property(p => p.Price).HasPrecision(10,2);
     }
 }

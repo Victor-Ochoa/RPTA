@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using RPTA.ProductApi.Data;
 using RPTA.ProductApi.Models;
+using RPTA.ProductApi.Request;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +14,8 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new() { Title = "RPTA.ProductApi", Version = "v1" });
 });
 
-builder.AddSqlServerDbContext<ProductDbContext>(connectionName: "productdb");
+builder.AddSqlServerDbContext<ProductDbContext>(
+    connectionName: "productdb");
 
 builder.Services.AddOpenApi();
 
@@ -22,6 +24,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
+    app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
 
@@ -50,17 +53,24 @@ app.MapGet("/products/{id}", async (int id, ProductDbContext db) =>
 .Produces(StatusCodes.Status404NotFound);
 
 // POST new product
-app.MapPost("/products", async (Product product, ProductDbContext db) =>
+app.MapPost("/products", async (ProductRequest product, ProductDbContext db) =>
 {
-    db.Products.Add(product);
+    var productDb = new Product
+    {
+        Name = product.Name,
+        Description = product.Description,
+        Price = product.Price,
+        Stock = product.Stock
+    };
+    db.Products.Add(productDb);
     await db.SaveChangesAsync();
-    return Results.Created($"/products/{product.Id}", product);
+    return Results.Created($"/products/{productDb.Id}", productDb);
 })
 .WithName("CreateProduct")
 .Produces<Product>(StatusCodes.Status201Created);
 
 // PUT update product
-app.MapPut("/products/{id}", async (int id, Product updatedProduct, ProductDbContext db) =>
+app.MapPut("/products/{id}", async (int id, ProductRequest updatedProduct, ProductDbContext db) =>
 {
     var product = await db.Products.FindAsync(id);
     if (product == null) return Results.NotFound();
