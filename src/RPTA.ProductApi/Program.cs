@@ -4,6 +4,8 @@ using RPTA.ProductApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 // Add services to the container
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -12,10 +14,6 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.AddSqlServerDbContext<ProductDbContext>(connectionName: "productdb");
-
-// Add health checks for Aspire dashboard
-builder.Services.AddHealthChecks()
-    .AddDbContextCheck<ProductDbContext>();
 
 builder.Services.AddOpenApi();
 
