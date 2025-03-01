@@ -15,6 +15,16 @@ builder.AddSqlServerDbContext<UserDbContext>(
 
 builder.Services.AddOpenApi();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -27,6 +37,9 @@ if (app.Environment.IsDevelopment())
     var dbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
     await dbContext.Database.EnsureCreatedAsync();
 }
+
+app.UseCors();
+
 app.MapDefaultEndpoints();
 
 app.UseHttpsRedirection();
