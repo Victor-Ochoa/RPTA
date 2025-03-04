@@ -2,45 +2,35 @@ using Microsoft.EntityFrameworkCore;
 using RPTA.UserApi.Data;
 using RPTA.UserApi.Models;
 using RPTA.UserApi.Request;
-using Scalar.AspNetCore;
 
-var builder = WebApplication.CreateSlimBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "RPTA.UserApi", Version = "v1" });
+});
 
 builder.AddSqlServerDbContext<UserDbContext>(
     connectionName: "userdb");
 
 builder.Services.AddOpenApi();
 
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(builder =>
-    {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
-});
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapOpenApi(); 
+    app.UseSwagger();
+    app.UseSwaggerUI();
 
     // Create database if not exists
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
     await dbContext.Database.EnsureCreatedAsync();
 }
-
-app.UseCors();
-
-app.MapDefaultEndpoints();
 
 app.UseHttpsRedirection();
 

@@ -34,6 +34,8 @@ if (app.Environment.IsDevelopment())
     await dbContext.Database.EnsureCreatedAsync();
 }
 
+app.MapDefaultEndpoints();
+
 app.UseHttpsRedirection();
 
 // Define API endpoints
