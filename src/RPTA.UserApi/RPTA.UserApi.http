@@ -1,11 +1,11 @@
 @RPTA.UserApi_HostAddress = http://localhost:5190
 
-GET {{RPTA.UserApi_HostAddress}}/todos/
+GET {{RPTA.UserApi_HostAddress}}/users
 Accept: application/json
 
 ###
 
-GET {{RPTA.UserApi_HostAddress}}/todos/1
+GET http://localhost:5028/api/user/users
 Accept: application/json
 
 ###

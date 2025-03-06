@@ -3,11 +3,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Yarp.ReverseProxy.Configuration;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
+using Yarp.ReverseProxy.Swagger.Extensions;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
 builder.AddServiceDefaults();
-builder.Services.AddHttpClient();
+
+builder.Services.AddHttpForwarderWithServiceDiscovery();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -20,8 +23,11 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+var configuration = builder.Configuration.GetSection("ReverseProxy");
+
 builder.Services.AddReverseProxy()
-    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+    .LoadFromConfig(configuration)
+    .AddSwagger(configuration);
 
 var app = builder.Build();
 
