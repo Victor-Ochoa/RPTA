@@ -1,4 +1,4 @@
-```markdown
+
 # Reverse Proxy Study with YARP and Aspire
 
 This project is a study of implementing a reverse proxy using YARP (Yet Another Reverse Proxy) and Aspire. The system is designed to manage user and product APIs, routing requests through a reverse proxy.
@@ -86,6 +86,3 @@ This project was developed as a study to demonstrate the use of YARP and Aspire 
 ## Contact
 
 For any inquiries, please contact Victor Ochoa at 'victor20054@gmail.com'.
-
-
-```
