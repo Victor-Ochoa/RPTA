@@ -15,11 +15,10 @@ var productApi = builder.AddProject<Projects.RPTA_ProductApi>("rpta-productapi")
     .WithReference(productDb)
     .WaitFor(productDb);
 
-var proxy = builder.AddProject<Projects.RPTA_ReverseProxy>("rpta-reverseproxy")
-    .WithReference(productApi)
-    .WaitFor(productApi)
+var reverseProxy = builder.AddYarp("reverse-proxy")
+    .WithEndpoint(port: 8001, scheme: "http")
     .WithReference(userApi)
-    .WaitFor(userApi)
-    .WithExternalHttpEndpoints();
+    .WithReference(productApi)
+    .LoadFromConfiguration("ReverseProxy");
 
 builder.Build().Run();

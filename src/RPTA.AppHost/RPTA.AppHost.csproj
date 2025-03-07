@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Sdk Name="Aspire.AppHost.Sdk" Version="9.0.0" />
 
@@ -12,13 +12,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspirant.Hosting.Yarp" Version="0.0.4" />
     <PackageReference Include="Aspire.Hosting.AppHost" Version="9.1.0" />
     <PackageReference Include="Aspire.Hosting.SqlServer" Version="9.1.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\RPTA.ProductApi\RPTA.ProductApi.csproj" />
-    <ProjectReference Include="..\RPTA.ReverseProxy\RPTA.ReverseProxy.csproj" />
     <ProjectReference Include="..\RPTA.UserApi\RPTA.UserApi.csproj" />
   </ItemGroup>
 
