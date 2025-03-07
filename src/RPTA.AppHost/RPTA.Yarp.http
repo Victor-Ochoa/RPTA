@@ -1,0 +1,74 @@
+@RPTAHostAddress = http://localhost:8001
+@productId = 1
+@UserId = 2
+
+GET {{RPTAHostAddress}}/api/products
+Accept: application/json
+
+###
+
+GET {{RPTAHostAddress}}/api/products/{{productId}}
+Accept: application/json
+
+###
+
+POST {{RPTAHostAddress}}/api/products
+Content-Type: application/json
+{
+  "name": "teste product",
+  "description": "teste product description",
+  "price": 10.9,
+  "stock": 10
+}
+
+###
+
+PUT {{RPTAHostAddress}}/api/products/{{productId}}
+Content-Type: application/json
+{
+  "name": "teste product edit",
+  "description": "teste product description edit",
+  "price": 10.9,
+  "stock": 10
+}
+
+###
+
+DELETE {{RPTAHostAddress}}/api/products/{{productId}}
+
+###
+GET {{RPTAHostAddress}}/api/Users
+Accept: application/json
+
+###
+
+GET {{RPTAHostAddress}}/api/Users/{{UserId}}
+Accept: application/json
+
+###
+
+POST {{RPTAHostAddress}}/api/Users
+Content-Type: application/json
+{
+  "firstName": "Name",
+  "lastName": "name",
+  "email": "name@mail.com"
+}
+
+###
+
+PUT {{RPTAHostAddress}}/api/Users/{{UserId}}
+Content-Type: application/json
+{
+  "firstName": "Name edit",
+  "lastName": "name"
+}
+
+###
+
+DELETE {{RPTAHostAddress}}/api/Users/{{UserId}}
+
+###
+DELETE {{RPTAHostAddress}}/api/Users/{{UserId}}/hard
+
+###
